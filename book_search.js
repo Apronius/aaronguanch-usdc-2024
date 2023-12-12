@@ -29,13 +29,26 @@ function findSearchTermInBooks(searchTerm, scannedTextObj) {
 
   let jsonLength = scannedTextObj[0]["Content"].length;
   for (let i = 0; i < jsonLength; i++) {
-    let currentLineString = scannedTextObj[0]["Content"][i]["Text"].replace(
-      /\W/,
-      ""
-    );
-    let currentLine = new Set(currentLineString.split(" "));
+    let currentLineString = scannedTextObj[0]["Content"][i]["Text"];
+    let currentLineArray = currentLineString.split(" ");
+    let currentLineSet = new Set(currentLineArray);
 
-    if (currentLine.has(searchTerm)) {
+    if (currentLineString[currentLineString.length - 1] === "-") {
+      let hyphenWord = currentLineArray[currentLineArray.length - 1].replace(
+        "-",
+        scannedTextObj[0]["Content"][i]["Text"].split(" ")[0]
+      );
+
+      if (searchTerm === hyphenWord) {
+        result["Results"].push({
+          ISBN: ISBN,
+          Page: parseInt(scannedTextObj[0]["Content"][i]["Page"]),
+          Line: parseInt(scannedTextObj[0]["Content"][i]["Line"]),
+        });
+      }
+    }
+
+    if (currentLineSet.has(searchTerm)) {
       result["Results"].push({
         ISBN: ISBN,
         Page: parseInt(scannedTextObj[0]["Content"][i]["Page"]),
