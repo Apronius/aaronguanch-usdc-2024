@@ -22,8 +22,9 @@ function findSearchTermInBooks(searchTerm, scannedTextObj) {
   /** You will need to implement your search and
    * return the appropriate object here. */
   const ISBN = scannedTextObj[0]["ISBN"];
+  const TERM = searchTerm.replace(/\W/,"");
   let result = {
-    SearchTerm: searchTerm,
+    SearchTerm: TERM,
     Results: [],
   };
 
@@ -44,7 +45,7 @@ function findSearchTermInBooks(searchTerm, scannedTextObj) {
     }
 
  
-    if (currentLineSet.has(searchTerm)) {
+    if (currentLineSet.has(TERM)) {
       result["Results"].push({
         ISBN: ISBN,
         Page: parseInt(scannedTextObj[0]["Content"][i]["Page"]),
