@@ -27,27 +27,23 @@ function findSearchTermInBooks(searchTerm, scannedTextObj) {
     Results: [],
   };
 
-  let jsonLength = scannedTextObj[0]["Content"].length;
-  for (let i = 0; i < jsonLength; i++) {
+  let lines = scannedTextObj[0]["Content"].length;
+
+  for (let i = 0; i < lines; i++) {
     let currentLineString = scannedTextObj[0]["Content"][i]["Text"];
-    let currentLineArray = currentLineString.split(" ");
+    let currentLineArray = currentLineString.replace(/\W/, "").split(" ");
     let currentLineSet = new Set(currentLineArray);
 
-    if (currentLineString[currentLineString.length - 1] === "-") {
+    // Edge case for line break
+    if (currentLineString[currentLineString.length - 1] === "-" && i < currentLineString.length - 1) {
       let hyphenWord = currentLineArray[currentLineArray.length - 1].replace(
         "-",
-        scannedTextObj[0]["Content"][i]["Text"].split(" ")[0]
+        scannedTextObj[0]["Content"][i+1]["Text"].split(" ")[0]
       );
-
-      if (searchTerm === hyphenWord) {
-        result["Results"].push({
-          ISBN: ISBN,
-          Page: parseInt(scannedTextObj[0]["Content"][i]["Page"]),
-          Line: parseInt(scannedTextObj[0]["Content"][i]["Line"]),
-        });
-      }
+      currentLineSet.add(hyphenWord);
     }
 
+ 
     if (currentLineSet.has(searchTerm)) {
       result["Results"].push({
         ISBN: ISBN,
@@ -85,7 +81,7 @@ const twentyLeaguesIn = [
   },
 ];
 
-/** Example output object */
+/** Example output objects */
 const twentyLeaguesOut = {
   SearchTerm: "the",
   Results: [
@@ -96,6 +92,26 @@ const twentyLeaguesOut = {
     },
   ],
 };
+const twentyLeaguesHyphen = {
+    SearchTerm: "darkness",
+    Results: [
+      {
+        ISBN: "9780000528531",
+        Page: 31,
+        Line: 8,
+      },
+    ],
+  };
+  const twentyLeaguesCaps = {
+    SearchTerm: "The",
+    Results: [
+      {
+        ISBN: "9780000528531",
+        Page: 31,
+        Line: 8,
+      },
+    ],
+  };
 
 /*
  _   _ _   _ ___ _____   _____ _____ ____ _____ ____  
@@ -112,6 +128,26 @@ const twentyLeaguesOut = {
  *
  * Please add your unit tests below.
  * */
+
+/** We can check that, given a known hypenated line, we get the line the hyphenated word starts on. */
+const testResultCustom1 = findSearchTermInBooks("darkness", twentyLeaguesIn);
+if(JSON.stringify(twentyLeaguesHyphen) === JSON.stringify(testResultCustom1)) {
+    console.log("PASS: Custom Test 1");
+} else {
+    console.log("FAIL: Custom Test 1");
+    console.log("Expected:", twentyLeaguesHyphen);
+    console.log("Received:", testResultCustom1);
+}
+
+/** We can check that, given a word with capitalization, we are returned only exact matches */
+const testResultCustom2 = findSearchTermInBooks("The", twentyLeaguesIn);
+if(JSON.stringify(twentyLeaguesCaps) === JSON.stringify(testResultCustom2)) {
+    console.log("PASS: Custom Test 2");
+} else {
+    console.log("FAIL: Custom Test 2");
+    console.log("Expected:", twentyLeaguesCaps);
+    console.log("Received:", testResultCustom2);
+}
 
 /** We can check that, given a known input, we get a known output. */
 const test1result = findSearchTermInBooks("the", twentyLeaguesIn);
